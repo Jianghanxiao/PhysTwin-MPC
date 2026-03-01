@@ -13,4 +13,7 @@ python segment_image.py
 
 # Project to object pcd
 python segment_to_pcd.py
+
+# Project full scene to world coordinate and visualize with Open3D
+python scene_to_world.py
 '''
