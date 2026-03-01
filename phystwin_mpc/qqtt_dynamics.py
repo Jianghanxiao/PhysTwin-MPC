@@ -55,6 +55,8 @@ class PhysDynamicModule:
         init_controller_rot,
         action_num,
         batch_size,
+        cloth_config_path="experiments/real_world/qqtt/configs/cloth.yaml",
+        real_config_path="experiments/real_world/qqtt/configs/real.yaml",
         device="cuda",
     ):
         seed = 42
@@ -63,9 +65,9 @@ class PhysDynamicModule:
         self.batch_size = batch_size
 
         if "cloth" in case_name or "package" in case_name:
-            cfg.load_from_yaml("experiments/real_world/qqtt/configs/cloth.yaml")
+            cfg.load_from_yaml(cloth_config_path)
         else:
-            cfg.load_from_yaml("experiments/real_world/qqtt/configs/real.yaml")
+            cfg.load_from_yaml(real_config_path)
 
         base_dir = f"{output_dir}/{case_name}"
 
@@ -211,12 +213,32 @@ class PhysDynamicModule:
 
 class QQTTDynamicsModule:
 
-    def __init__(self, batch_size, num_steps_total):
+    def __init__(
+        self,
+        batch_size,
+        num_steps_total,
+        base_path,
+        case_name,
+        experiments_path,
+        experiments_optimization_path,
+        output_dir,
+        cloth_config_path,
+        real_config_path,
+        device="cuda",
+    ):
 
         self.dynamics_module = None
 
         self.batch_size = batch_size
         self.action_num = num_steps_total + 1
+        self.base_path = base_path
+        self.case_name = case_name
+        self.experiments_path = experiments_path
+        self.experiments_optimization_path = experiments_optimization_path
+        self.output_dir = output_dir
+        self.cloth_config_path = cloth_config_path
+        self.real_config_path = real_config_path
+        self.device = device
 
     def reset_model(self, x=None):
         return
@@ -243,18 +265,20 @@ class QQTTDynamicsModule:
             init_controller_rot = eef_rot[0, 0].cpu().numpy()
 
             self.dynamics_module = PhysDynamicModule(
-                base_path="experiments/log/data/robot_data/different_types",
-                case_name="single_lift_cloth_1",
-                experiments_path="experiments/log/data/robot_data/experiments",
-                experiments_optimization_path="experiments/log/data/robot_data/experiments_optimization",
-                output_dir="experiments/log/data/robot_data/temp_experiments",
+                base_path=self.base_path,
+                case_name=self.case_name,
+                experiments_path=self.experiments_path,
+                experiments_optimization_path=self.experiments_optimization_path,
+                output_dir=self.output_dir,
                 init_pts=init_pts,
                 init_colors=init_colors,
                 init_controller_xyz=init_controller_xyz,
                 init_controller_rot=init_controller_rot,
                 action_num=self.action_num,
                 batch_size=self.batch_size,
-                device="cuda",
+                cloth_config_path=self.cloth_config_path,
+                real_config_path=self.real_config_path,
+                device=self.device,
             )
 
         controller_xyzs = eef_xyz[:, 1:]

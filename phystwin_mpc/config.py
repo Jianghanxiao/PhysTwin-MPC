@@ -23,11 +23,23 @@ class TaskConfig:
 
 
 @dataclass(frozen=True)
+class QQTTDynamicsConfig:
+    base_path: str = "experiments/log/data/robot_data/different_types"
+    case_name: str = "single_lift_cloth_1"
+    experiments_path: str = "experiments/log/data/robot_data/experiments"
+    experiments_optimization_path: str = "experiments/log/data/robot_data/experiments_optimization"
+    output_dir: str = "experiments/log/data/robot_data/temp_experiments"
+    cloth_config_path: str = "experiments/real_world/qqtt/configs/cloth.yaml"
+    real_config_path: str = "experiments/real_world/qqtt/configs/real.yaml"
+
+
+@dataclass(frozen=True)
 class PlanningConfig:
     seed: int
     max_points: int
     mppi: MPPIConfig
     task: TaskConfig
+    qqtt_dynamics: QQTTDynamicsConfig
     action_dim: int = 13  # xyz(3) + rot(9) + gripper(1)
 
 
@@ -51,4 +63,5 @@ def build_plan_config(task: str, seed: int, max_points: int) -> PlanningConfig:
         max_points=max_points,
         mppi=MPPIConfig(),
         task=task_cfg,
+        qqtt_dynamics=QQTTDynamicsConfig(),
     )

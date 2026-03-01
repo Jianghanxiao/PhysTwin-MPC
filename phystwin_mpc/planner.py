@@ -23,7 +23,18 @@ class OpenLoopQQTTPlanner:
         self.cfg = config
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         torch.manual_seed(config.seed)
-        self.dynamics = QQTTDynamicsModule(batch_size=config.mppi.n_sample, num_steps_total=config.mppi.n_look_ahead)
+        self.dynamics = QQTTDynamicsModule(
+            batch_size=config.mppi.n_sample,
+            num_steps_total=config.mppi.n_look_ahead,
+            base_path=config.qqtt_dynamics.base_path,
+            case_name=config.qqtt_dynamics.case_name,
+            experiments_path=config.qqtt_dynamics.experiments_path,
+            experiments_optimization_path=config.qqtt_dynamics.experiments_optimization_path,
+            output_dir=config.qqtt_dynamics.output_dir,
+            cloth_config_path=config.qqtt_dynamics.cloth_config_path,
+            real_config_path=config.qqtt_dynamics.real_config_path,
+            device=self.device,
+        )
         self.bbox_t = torch.tensor(config.task.bbox, dtype=torch.float32, device=self.device)
         self.margin = float(config.task.bbox_margin)
         self.height_threshold = float(config.task.eef_height_penalty_threshold)
