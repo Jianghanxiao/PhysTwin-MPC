@@ -87,6 +87,21 @@ def load_c2w(calibrate_pkl: Path, camera_idx: int) -> Optional[np.ndarray]:
     return c2w
 
 
+def load_4x4_transform(transform_pkl: Path, name: str) -> np.ndarray:
+    if not transform_pkl.exists():
+        raise FileNotFoundError(f"{name} file not found: {transform_pkl}")
+
+    with open(transform_pkl, "rb") as f:
+        transform_raw = pickle.load(f)
+
+    transform = np.asarray(transform_raw, dtype=np.float32)
+    if transform.shape != (4, 4):
+        raise ValueError(
+            f"Invalid {name} shape: {transform.shape}, expected (4,4)"
+        )
+    return transform
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Project full scene depth to world coordinate and visualize with Open3D"
@@ -123,6 +138,17 @@ def main() -> None:
         type=float,
         default=0.2,
         help="Open3D world coordinate frame size in meters",
+    )
+    parser.add_argument(
+        "--to_robot_base",
+        action="store_true",
+        help="Transform points from world frame to robot base frame before visualization",
+    )
+    parser.add_argument(
+        "--base2world_pkl",
+        type=str,
+        default="base2world.pkl",
+        help="PKL path storing 4x4 base-to-world transform (used when --to_robot_base is set)",
     )
     parser.add_argument("--save_ply", type=str, default="", help="Optional output PLY path")
     parser.add_argument(
@@ -194,6 +220,20 @@ def main() -> None:
         points_world = points
         frame_name = "camera (calibrate.pkl not found)"
         print("[WARN] calibrate.pkl not found, points stay in camera frame.")
+
+    if args.to_robot_base:
+        if c2w is None:
+            raise RuntimeError(
+                "Cannot transform to robot base frame without world-frame points. "
+                "Please provide calibrate.pkl so points can be lifted to world first."
+            )
+        base2world = load_4x4_transform(Path(args.base2world_pkl), "base2world")
+        world2base = np.linalg.inv(base2world).astype(np.float32)
+        homo_world = np.concatenate(
+            [points_world, np.ones((points_world.shape[0], 1), dtype=np.float32)], axis=1
+        )
+        points_world = (world2base @ homo_world.T).T[:, :3]
+        frame_name = "robot_base"
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points_world.astype(np.float64))
