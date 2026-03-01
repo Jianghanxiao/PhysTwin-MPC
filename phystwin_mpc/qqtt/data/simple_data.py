@@ -1,7 +1,7 @@
 # The simplest test data with full 3D point trajectories (n_frames, n_points, 3)
 import numpy as np
 import torch
-from qqtt.utils import logger, visualize_pc, cfg
+from ..utils import logger, visualize_pc, cfg
 
 
 class SimpleData:

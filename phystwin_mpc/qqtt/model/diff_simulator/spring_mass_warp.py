@@ -1,5 +1,5 @@
 import torch
-from qqtt.utils import logger, cfg
+from ...utils import logger, cfg
 import warp as wp
 
 wp.init()

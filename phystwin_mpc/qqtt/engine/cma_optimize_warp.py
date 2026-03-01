@@ -1,6 +1,6 @@
-from qqtt.data import RealData, SimpleData
-from qqtt.utils import logger, visualize_pc, cfg
-from qqtt.model.diff_simulator import SpringMassSystemWarp
+from ..data import RealData, SimpleData
+from ..utils import logger, visualize_pc, cfg
+from ..model.diff_simulator import SpringMassSystemWarp
 import open3d as o3d
 import numpy as np
 import torch

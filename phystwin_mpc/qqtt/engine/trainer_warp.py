@@ -1,6 +1,6 @@
-from qqtt.data import RealData, SimpleData
-from qqtt.utils import logger, visualize_pc, cfg
-from qqtt.model.diff_simulator import (
+from ..data import RealData, SimpleData
+from ..utils import logger, visualize_pc, cfg
+from ..model.diff_simulator import (
     SpringMassSystemWarp,
     SpringMassSystemWarpAccelerate,
 )
