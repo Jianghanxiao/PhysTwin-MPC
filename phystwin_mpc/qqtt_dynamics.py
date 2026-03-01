@@ -178,8 +178,10 @@ class PhysDynamicModule:
                 controller_mesh.compute_vertex_normals()
                 controller_mesh.paint_uniform_color(origin_color)
                 controller_meshes.append(controller_mesh)
+            
+            coordinate = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
 
-            o3d.visualization.draw_geometries([source, target, *controller_meshes])
+            o3d.visualization.draw_geometries([source, target, *controller_meshes, coordinate])
 
         return final_points
 
