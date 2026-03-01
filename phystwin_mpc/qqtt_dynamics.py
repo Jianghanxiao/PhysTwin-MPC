@@ -55,8 +55,8 @@ class PhysDynamicModule:
         init_controller_rot,
         action_num,
         batch_size,
-        cloth_config_path="experiments/real_world/qqtt/configs/cloth.yaml",
-        real_config_path="experiments/real_world/qqtt/configs/real.yaml",
+        cloth_config_path,
+        real_config_path,
         device="cuda",
     ):
         seed = 42

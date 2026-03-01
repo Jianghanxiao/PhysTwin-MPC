@@ -24,13 +24,14 @@ class TaskConfig:
 
 @dataclass(frozen=True)
 class QQTTDynamicsConfig:
-    base_path: str = "experiments/log/data/robot_data/different_types"
+    base_path: str = "phystwin_assets/different_types"
+    # single_lift_rope or single_lift_cloth_1
     case_name: str = "single_lift_cloth_1"
-    experiments_path: str = "experiments/log/data/robot_data/experiments"
-    experiments_optimization_path: str = "experiments/log/data/robot_data/experiments_optimization"
-    output_dir: str = "experiments/log/data/robot_data/temp_experiments"
-    cloth_config_path: str = "experiments/real_world/qqtt/configs/cloth.yaml"
-    real_config_path: str = "experiments/real_world/qqtt/configs/real.yaml"
+    experiments_path: str = "phystwin_assets/experiments"
+    experiments_optimization_path: str = "phystwin_assets/experiments_optimization"
+    output_dir: str = "outputs_exp"
+    cloth_config_path: str = "phystwin_mpc/qqtt/configs/cloth.yaml"
+    real_config_path: str = "phystwin_mpc/qqtt/configs/real.yaml"
 
 
 @dataclass(frozen=True)

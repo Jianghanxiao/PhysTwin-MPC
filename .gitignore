@@ -1,6 +1,8 @@
 backup_mpc/
 outputs/
 groundedSAM_checkpoints/
+phystwin_assets/
+outputs*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
