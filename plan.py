@@ -26,9 +26,9 @@ def _load_base2world_matrix(path: Path) -> np.ndarray:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Root-level clean QQTT-style open-loop planner")
-    parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="cloth")
-    parser.add_argument("--current-pcd", type=str, required=True, help="Current object point cloud file")
-    parser.add_argument("--target-pcd", type=str, required=True, help="Target object point cloud file")
+    parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="rope")
+    parser.add_argument("--current-pcd", type=str, default="source_rope/object.ply", help="Current object point cloud file")
+    parser.add_argument("--target-pcd", type=str, default="target_rope/object.ply", help="Target object point cloud file")
     parser.add_argument("--robot", type=str, choices=["mock", "xarm7"], default="mock")
     parser.add_argument("--xarm-ip", type=str, default="192.168.1.196")
     parser.add_argument("--xarm-speed", type=float, default=100.0)
@@ -36,7 +36,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--xarm-gripper-enable", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--execute", action="store_true", help="Execute full open-loop sequence on robot")
-    parser.add_argument("--save-dir", type=str, default="outputs/original")
+    parser.add_argument("--save-dir", type=str, default="outputs/plan", help="Directory to save planning results")
     parser.add_argument("--max-points", type=int, default=1000)
     parser.add_argument(
         "--base2world",
