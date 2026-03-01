@@ -30,10 +30,10 @@ except ImportError:
 
 
 # Configuration
-SAM2_CHECKPOINT = "data_process/groundedSAM_checkpoints/sam2.1_hiera_large.pt"
-SAM2_MODEL_CONFIG = "data_process/groundedSAM_checkpoints/configs/sam2.1/sam2.1_hiera_l.yaml"
-GROUNDING_DINO_CONFIG = "data_process/groundedSAM_checkpoints/GroundingDINO_SwinT_OGC.py"
-GROUNDING_DINO_CHECKPOINT = "data_process/groundedSAM_checkpoints/groundingdino_swint_ogc.pth"
+SAM2_CHECKPOINT = "groundedSAM_checkpoints/sam2.1_hiera_large.pt"
+SAM2_MODEL_CONFIG = "configs/sam2.1/sam2.1_hiera_l.yaml"
+GROUNDING_DINO_CONFIG = "groundedSAM_checkpoints/GroundingDINO_SwinT_OGC.py"
+GROUNDING_DINO_CHECKPOINT = "groundedSAM_checkpoints/groundingdino_swint_ogc.pth"
 
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
@@ -170,7 +170,7 @@ def main():
         help="Path to save segmented image",
     )
     parser.add_argument(
-        "--text_prompt", type=str, default="rope.", help="Text description of object"
+        "--text_prompt", type=str, default="twine.", help="Text description of object"
     )
     parser.add_argument(
         "--visualize", action="store_true", help="Visualize results"
