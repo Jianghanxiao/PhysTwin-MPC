@@ -1,6 +1,8 @@
 import argparse
+from dataclasses import replace
 from pathlib import Path
 import pickle
+import time
 import numpy as np
 
 from phystwin_mpc.config import build_plan_config
@@ -41,6 +43,19 @@ def _load_camera_c2w_from_calibrate(path: Path, camera_idx: int) -> np.ndarray:
     return mats[camera_idx]
 
 
+def _load_camera_intrinsic(path: Path, camera_idx: int) -> np.ndarray:
+    intrinsics = np.load(path)
+    if intrinsics.ndim == 2 and intrinsics.shape == (3, 3):
+        return intrinsics.astype(np.float64)
+    if intrinsics.ndim == 3 and intrinsics.shape[1:] == (3, 3):
+        if not (0 <= camera_idx < intrinsics.shape[0]):
+            raise IndexError(
+                f"camera_idx={camera_idx} out of range for intrinsics with {intrinsics.shape[0]} cameras"
+            )
+        return intrinsics[camera_idx].astype(np.float64)
+    raise ValueError(f"intrinsics.npy must be [3,3] or [N,3,3], got {intrinsics.shape}")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Root-level clean QQTT-style open-loop planner")
     parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="rope")
@@ -70,8 +85,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--video-calibrate-pkl",
         type=str,
-        default="",
-        help="Optional path to calibrate.pkl; if set, rollout video uses this camera extrinsic for viewpoint",
+        default="source_rope/calibrate.pkl",
+        help="Path to calibrate.pkl for rollout video camera extrinsic (required for camera-matched rendering)",
     )
     parser.add_argument(
         "--video-camera-idx",
@@ -79,15 +94,32 @@ def parse_args() -> argparse.Namespace:
         default=0,
         help="Camera index used with --video-calibrate-pkl",
     )
+    parser.add_argument(
+        "--video-intrinsics-npy",
+        type=str,
+        default="source_rope/intrinsics.npy",
+        help="Path to intrinsics.npy for rollout video camera intrinsic (required for camera-matched rendering)",
+    )
+    parser.add_argument(
+        "--video-overlay-image",
+        type=str,
+        default="source_rope/color.png",
+        help="RGB image path for white-background compositing (default: source_rope/color.png)",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    t0 = time.perf_counter()
     save_dir = Path(args.save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
 
     config = build_plan_config(task=args.task, seed=args.seed, max_points=args.max_points)
+    config = replace(
+        config,
+        qqtt_dynamics=replace(config.qqtt_dynamics, output_dir=str(save_dir)),
+    )
 
     if args.robot == "mock":
         robot = MockRobot()
@@ -106,9 +138,19 @@ def main() -> None:
     else:
         raise ValueError(f"Unsupported robot type: {args.robot}")
 
-    video_camera_c2w = None
-    if args.video_calibrate_pkl:
-        video_camera_c2w = _load_camera_c2w_from_calibrate(Path(args.video_calibrate_pkl), args.video_camera_idx)
+    video_calibrate_path = Path(args.video_calibrate_pkl)
+    if not video_calibrate_path.exists():
+        raise FileNotFoundError(f"video calibrate file not found: {video_calibrate_path}")
+    video_camera_c2w = _load_camera_c2w_from_calibrate(video_calibrate_path, args.video_camera_idx)
+
+    video_intrinsics_path = Path(args.video_intrinsics_npy)
+    if not video_intrinsics_path.exists():
+        raise FileNotFoundError(f"video intrinsics file not found: {video_intrinsics_path}")
+    video_camera_intrinsic = _load_camera_intrinsic(video_intrinsics_path, args.video_camera_idx)
+
+    video_overlay_image = Path(args.video_overlay_image) if args.video_overlay_image else None
+    if video_overlay_image is not None and not video_overlay_image.exists():
+        raise FileNotFoundError(f"video overlay image not found: {video_overlay_image}")
 
     pipeline = OpenLoopPlanningPipeline(config=config, robot=robot)
     result = pipeline.run(
@@ -117,11 +159,27 @@ def main() -> None:
         execute=args.execute,
         save_dir=save_dir,
         video_camera_c2w=video_camera_c2w,
+        video_camera_intrinsic=video_camera_intrinsic,
+        video_overlay_image=video_overlay_image,
     )
+    total_seconds = time.perf_counter() - t0
 
     print("Planning finished.")
     print(f"Best reward: {result['best_reward']:.6f}")
     print(f"Final chamfer: {result['final_chamfer']:.6f}")
+    if "timing" in result:
+        timing = result["timing"]
+        print(
+            "Timing (s): "
+            f"total={timing.get('total_seconds', total_seconds):.3f}, "
+            f"load_pcd={timing.get('load_pcd_seconds', 0.0):.3f}, "
+            f"plan={timing.get('plan_seconds', 0.0):.3f}, "
+            f"rollout={timing.get('rollout_seconds', 0.0):.3f}, "
+            f"visualize={timing.get('visualize_seconds', 0.0):.3f}, "
+            f"execute={timing.get('execute_seconds', 0.0):.3f}"
+        )
+    else:
+        print(f"Timing (s): total={total_seconds:.3f}")
     print(f"Saved to: {save_dir}")
 
 

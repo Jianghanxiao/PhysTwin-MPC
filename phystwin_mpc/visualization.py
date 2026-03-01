@@ -13,20 +13,15 @@ def _make_pose(xyz: np.ndarray, rot: np.ndarray) -> np.ndarray:
     return pose
 
 
-def _normalize(vec: np.ndarray, eps: float = 1e-8) -> np.ndarray:
-    n = float(np.linalg.norm(vec))
-    if n < eps:
-        return vec
-    return vec / n
-
-
 def save_rollout_mp4(
     object_points_seq: np.ndarray,
     eef_xyz_seq: np.ndarray,
     eef_rot_seq: np.ndarray,
     save_path: Path,
+    camera_c2w: np.ndarray,
+    camera_intrinsic: np.ndarray,
     target_points: np.ndarray | None = None,
-    camera_c2w: np.ndarray | None = None,
+    overlay_image_path: Path | None = None,
     fps: int = 20,
     width: int = 1280,
     height: int = 720,
@@ -44,10 +39,20 @@ def save_rollout_mp4(
             "object and eef sequence lengths must match: "
             f"object={n_frames}, xyz={eef_xyz_seq.shape[0]}, rot={eef_rot_seq.shape[0]}"
         )
-    if camera_c2w is not None:
-        camera_c2w = np.asarray(camera_c2w, dtype=np.float64)
-        if camera_c2w.shape != (4, 4):
-            raise ValueError(f"camera_c2w must be [4,4], got {camera_c2w.shape}")
+    camera_c2w = np.asarray(camera_c2w, dtype=np.float64)
+    if camera_c2w.shape != (4, 4):
+        raise ValueError(f"camera_c2w must be [4,4], got {camera_c2w.shape}")
+    camera_intrinsic = np.asarray(camera_intrinsic, dtype=np.float64)
+    if camera_intrinsic.shape != (3, 3):
+        raise ValueError(f"camera_intrinsic must be [3,3], got {camera_intrinsic.shape}")
+
+    overlay_rgb = None
+    if overlay_image_path is not None:
+        overlay_image = cv2.imread(str(overlay_image_path), cv2.IMREAD_COLOR)
+        if overlay_image is None:
+            raise FileNotFoundError(f"Failed to read overlay image: {overlay_image_path}")
+        overlay_rgb = cv2.cvtColor(overlay_image, cv2.COLOR_BGR2RGB)
+        height, width = overlay_rgb.shape[:2]
 
     save_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -85,41 +90,21 @@ def save_rollout_mp4(
     eef_path.colors = o3d.utility.Vector3dVector([])
     vis.add_geometry(eef_path)
 
-    all_points = [object_points_seq[0]]
-    if target_points is not None:
-        all_points.append(target_points)
-    cloud_stack = np.concatenate(all_points, axis=0)
-    center = cloud_stack.mean(axis=0)
-    extent = np.maximum(cloud_stack.max(axis=0) - cloud_stack.min(axis=0), 1e-3)
-    radius = float(np.linalg.norm(extent))
-
     view = vis.get_view_control()
-    view.set_lookat(center.tolist())
-    if camera_c2w is None:
-        view.set_front([0.8, -0.3, 0.5])
-        view.set_up([0.0, 0.0, 1.0])
-    else:
-        cam_pos = camera_c2w[:3, 3]
-        cam_rot = camera_c2w[:3, :3]
+    camera_w2c = np.linalg.inv(camera_c2w)
+    camera_params = o3d.camera.PinholeCameraParameters()
+    intrinsic_parameter = o3d.camera.PinholeCameraIntrinsic(width, height, camera_intrinsic)
+    camera_params.intrinsic = intrinsic_parameter
+    camera_params.extrinsic = camera_w2c
+    view.convert_from_pinhole_camera_parameters(camera_params, allow_arbitrary=True)
 
-        front = _normalize(center - cam_pos)
-        if np.linalg.norm(front) < 1e-8:
-            front = np.array([0.8, -0.3, 0.5], dtype=np.float64)
-
-        up = _normalize(-cam_rot[:, 1])
-        if np.linalg.norm(up) < 1e-8 or abs(float(np.dot(front, up))) > 0.99:
-            up = np.array([0.0, 0.0, 1.0], dtype=np.float64)
-
-        right = _normalize(np.cross(front, up))
-        if np.linalg.norm(right) > 1e-8:
-            up = _normalize(np.cross(right, front))
-
-        view.set_front(front.tolist())
-        view.set_up(up.tolist())
-    view.set_zoom(max(0.2, min(0.9, 0.5 / (radius + 1e-6))))
-
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    fourcc = cv2.VideoWriter_fourcc(*"avc1")
     writer = cv2.VideoWriter(str(save_path), fourcc, float(fps), (width, height))
+    if not writer.isOpened():
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(str(save_path), fourcc, float(fps), (width, height))
+    if not writer.isOpened():
+        raise RuntimeError(f"Failed to open video writer for {save_path}")
 
     prev_eef = eef_xyz_seq[0].astype(np.float64)
     for i in range(n_frames):
@@ -150,6 +135,16 @@ def save_rollout_mp4(
 
         frame = np.asarray(vis.capture_screen_float_buffer(do_render=True))
         frame = (np.clip(frame, 0.0, 1.0) * 255).astype(np.uint8)
+
+        if overlay_rgb is not None:
+            if overlay_rgb.shape[:2] != frame.shape[:2]:
+                raise ValueError(
+                    "Overlay image shape must match render shape, got "
+                    f"overlay={overlay_rgb.shape[:2]}, render={frame.shape[:2]}"
+                )
+            mask = np.all(frame == [255, 255, 255], axis=-1)
+            frame[mask] = overlay_rgb[mask]
+
         writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
     writer.release()

@@ -69,7 +69,7 @@ class PhysDynamicModule:
         else:
             cfg.load_from_yaml(real_config_path)
 
-        base_dir = f"{output_dir}/{case_name}"
+        base_dir = str(Path(output_dir))
 
         optimal_path = f"{experiments_optimization_path}/{case_name}/optimal_params.pkl"
         logger.info(f"Load optimal parameters from: {optimal_path}")
