@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import platform
 import numpy as np
 import cv2
 import open3d as o3d
@@ -11,6 +12,27 @@ def _make_pose(xyz: np.ndarray, rot: np.ndarray) -> np.ndarray:
     pose[:3, :3] = rot.astype(np.float64)
     pose[:3, 3] = xyz.astype(np.float64)
     return pose
+
+
+def _open_video_writer(save_path: Path, fps: int, width: int, height: int) -> cv2.VideoWriter:
+    codec_candidates = ["mp4v", "avc1", "XVID", "MJPG"]
+    if platform.system().lower() != "linux":
+        codec_candidates = ["avc1", "mp4v", "XVID", "MJPG"]
+
+    for codec in codec_candidates:
+        writer = cv2.VideoWriter(
+            str(save_path),
+            cv2.VideoWriter_fourcc(*codec),
+            float(fps),
+            (width, height),
+        )
+        if writer.isOpened():
+            print(f"[save_rollout_mp4] using video codec: {codec}")
+            return writer
+
+    raise RuntimeError(
+        f"Failed to open video writer for {save_path}. Tried codecs: {', '.join(codec_candidates)}"
+    )
 
 
 def save_rollout_mp4(
@@ -98,13 +120,7 @@ def save_rollout_mp4(
     camera_params.extrinsic = camera_w2c
     view.convert_from_pinhole_camera_parameters(camera_params, allow_arbitrary=True)
 
-    fourcc = cv2.VideoWriter_fourcc(*"avc1")
-    writer = cv2.VideoWriter(str(save_path), fourcc, float(fps), (width, height))
-    if not writer.isOpened():
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        writer = cv2.VideoWriter(str(save_path), fourcc, float(fps), (width, height))
-    if not writer.isOpened():
-        raise RuntimeError(f"Failed to open video writer for {save_path}")
+    writer = _open_video_writer(save_path, fps, width, height)
 
     prev_eef = eef_xyz_seq[0].astype(np.float64)
     for i in range(n_frames):
