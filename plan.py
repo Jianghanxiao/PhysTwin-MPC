@@ -24,6 +24,23 @@ def _load_base2world_matrix(path: Path) -> np.ndarray:
     return mat
 
 
+def _load_camera_c2w_from_calibrate(path: Path, camera_idx: int) -> np.ndarray:
+    if path.suffix.lower() != ".pkl":
+        raise ValueError(f"calibrate file must be .pkl, got: {path.suffix}")
+
+    with open(path, "rb") as f:
+        data = pickle.load(f)
+
+    mats = np.asarray(data, dtype=np.float32)
+    if mats.ndim == 2 and mats.shape == (4, 4):
+        return mats
+    if mats.ndim != 3 or mats.shape[1:] != (4, 4):
+        raise ValueError(f"calibrate.pkl must store [N,4,4] or [4,4], got {mats.shape}")
+    if not (0 <= camera_idx < mats.shape[0]):
+        raise IndexError(f"camera_idx={camera_idx} out of range for calibrate with {mats.shape[0]} cameras")
+    return mats[camera_idx]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Root-level clean QQTT-style open-loop planner")
     parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="rope")
@@ -49,6 +66,18 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="base2world.pkl",
         help="Path to base2world.pkl storing a raw 4x4 base-to-world matrix",
+    )
+    parser.add_argument(
+        "--video-calibrate-pkl",
+        type=str,
+        default="",
+        help="Optional path to calibrate.pkl; if set, rollout video uses this camera extrinsic for viewpoint",
+    )
+    parser.add_argument(
+        "--video-camera-idx",
+        type=int,
+        default=0,
+        help="Camera index used with --video-calibrate-pkl",
     )
     return parser.parse_args()
 
@@ -77,12 +106,17 @@ def main() -> None:
     else:
         raise ValueError(f"Unsupported robot type: {args.robot}")
 
+    video_camera_c2w = None
+    if args.video_calibrate_pkl:
+        video_camera_c2w = _load_camera_c2w_from_calibrate(Path(args.video_calibrate_pkl), args.video_camera_idx)
+
     pipeline = OpenLoopPlanningPipeline(config=config, robot=robot)
     result = pipeline.run(
         current_pcd_path=Path(args.current_pcd),
         target_pcd_path=Path(args.target_pcd),
         execute=args.execute,
         save_dir=save_dir,
+        video_camera_c2w=video_camera_c2w,
     )
 
     print("Planning finished.")

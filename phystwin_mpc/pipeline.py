@@ -17,7 +17,14 @@ class OpenLoopPlanningPipeline:
         self.robot = robot
         self.planner = OpenLoopQQTTPlanner(config)
 
-    def run(self, current_pcd_path: Path, target_pcd_path: Path, execute: bool, save_dir: Path) -> dict:
+    def run(
+        self,
+        current_pcd_path: Path,
+        target_pcd_path: Path,
+        execute: bool,
+        save_dir: Path,
+        video_camera_c2w: np.ndarray | None = None,
+    ) -> dict:
         current_pts = load_point_cloud(current_pcd_path)
         target_pts = load_point_cloud(target_pcd_path)
 
@@ -83,6 +90,7 @@ class OpenLoopPlanningPipeline:
             eef_xyz_seq=eef_xyz_seq,
             eef_rot_seq=eef_rot_seq,
             target_points=target_pts,
+            camera_c2w=video_camera_c2w,
             save_path=save_dir / "best_rollout.mp4",
         )
 
