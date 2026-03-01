@@ -193,3 +193,29 @@ class OpenLoopQQTTPlanner:
                 )
 
         return PlanResult(best_action_seq=best_seq.detach().cpu().numpy(), best_reward=best_reward, final_chamfer=best_chamfer)
+
+    def rollout_trajectory(self, current_pts: np.ndarray, action_seq: np.ndarray) -> np.ndarray:
+        pts_t = torch.as_tensor(current_pts, dtype=torch.float32, device=self.device)
+        action_t = torch.as_tensor(action_seq, dtype=torch.float32, device=self.device)[None]
+
+        horizon = action_t.shape[1]
+        eef_xyz = action_t[:, :, :3].reshape(1, horizon, 1, 3)
+        eef_rot = action_t[:, :, 3:12].reshape(1, horizon, 1, 3, 3)
+        eef_gripper = action_t[:, :, 12:13].reshape(1, horizon, 1, 1)
+
+        eef_xyz = torch.cat([eef_xyz[:, :1], eef_xyz], dim=1)
+        eef_rot = torch.cat([eef_rot[:, :1], eef_rot], dim=1)
+        eef_gripper = torch.cat([eef_gripper[:, :1], eef_gripper], dim=1)
+
+        with torch.no_grad():
+            x, _ = self.dynamics.rollout(
+                pts_t,
+                eef_xyz,
+                eef_rot,
+                eef_gripper,
+                pts_his=None,
+                visualize_pv=False,
+                return_trajectory=True,
+            )
+
+        return x[0].detach().cpu().numpy()

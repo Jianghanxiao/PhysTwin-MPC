@@ -183,9 +183,8 @@ class PhysDynamicModule:
 
         return final_points
 
-    def rollout_serialize(self, eef_xyz, eef_rot, visualize=False):
+    def rollout_serialize(self, eef_xyz, eef_rot, visualize=False, return_trajectory=False):
         batch_size = eef_xyz.shape[0]
-        assert batch_size == self.batch_size
         all_pts = []
 
         for i in range(batch_size):
@@ -205,7 +204,11 @@ class PhysDynamicModule:
                     controller_points_array, dtype=torch.float, device=self.device
                 ).contiguous()
                 # TODO: can use rollout_no_acc
-                pts = self.trainer.rollout(controller_points_array, visualize=(visualize and i < 10))
+                pts = self.trainer.rollout(
+                    controller_points_array,
+                    visualize=(visualize and i < 10),
+                    return_trajectory=return_trajectory,
+                )
                 all_pts.append(pts.clone())
 
         return all_pts
@@ -249,7 +252,7 @@ class QQTTDynamicsModule:
     def reset_downsample_indices(self, pts, uniform=True):
         pass
 
-    def rollout(self, pts, eef_xyz, eef_rot, eef_gripper, pts_his=None, visualize_pv=False):
+    def rollout(self, pts, eef_xyz, eef_rot, eef_gripper, pts_his=None, visualize_pv=False, return_trajectory=False):
 
         assert eef_xyz.shape[1] == self.action_num
         assert eef_rot.shape[1] == self.action_num
@@ -288,9 +291,11 @@ class QQTTDynamicsModule:
         results = self.dynamics_module.rollout_serialize(
             controller_xyzs, controller_rots,
             visualize=visualize_pv,
+            return_trajectory=return_trajectory,
         )
         x = torch.stack(results, dim=0)
-        x = x[:, None]
+        if not return_trajectory:
+            x = x[:, None]
 
         v = torch.zeros_like(x)
         return x, v
