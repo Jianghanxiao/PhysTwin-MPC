@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Capture a single observation from all cameras and save RGB + Depth images.
+Capture a single observation from all cameras and save RGB + Depth data.
 """
 
 import sys
@@ -49,15 +49,15 @@ def main():
     cv2.imwrite(str(rgb_path), cam_data["color"])
     print(f"  - Saved RGB:   {rgb_path}")
 
-    depth = cam_data["depth"].astype(np.uint16)
-    depth_path = output_dir / "depth.png"
-    cv2.imwrite(str(depth_path), depth)
+    depth = cam_data["depth"]
+    depth_path = output_dir / "depth.npy"
+    np.save(depth_path, depth)
     print(f"  - Saved Depth: {depth_path}")
     
     # Save metadata as JSON
     metadata = {
         "num_cam": camera_system.num_cam,
-        "saved_files": ["color.png", "depth.png", "intrinsics.npy"],
+        "saved_files": ["color.png", "depth.npy", "intrinsics.npy"],
     }
     metadata_path = output_dir / "metadata.json"
     with open(metadata_path, "w") as f:

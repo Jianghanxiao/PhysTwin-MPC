@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Convert segmentation mask to point cloud.
-Uses depth image + intrinsics + binary mask to generate 3D point cloud.
+Uses depth array + intrinsics + binary mask to generate 3D point cloud.
 Applies statistical outlier removal for noise filtering.
 """
 
@@ -127,7 +127,7 @@ def main():
         description="Convert segmentation mask to point cloud"
     )
     parser.add_argument(
-        "--depth_path", type=str, default="outputs/depth.png", help="Path to depth image (PNG) in mm"
+        "--depth_path", type=str, default="outputs/depth.npy", help="Path to depth array (NPY) in mm"
     )
     parser.add_argument(
         "--mask_path", type=str, default="outputs/mask.png", help="Path to binary mask image (PNG)"
@@ -153,11 +153,13 @@ def main():
     
     args = parser.parse_args()
     
-    # Load depth image
-    print(f"[INFO] Loading depth image: {args.depth_path}")
-    depth_img = cv2.imread(args.depth_path, cv2.IMREAD_UNCHANGED)
-    if depth_img is None:
-        print(f"[ERROR] Failed to load depth image: {args.depth_path}")
+    # Load depth array
+    print(f"[INFO] Loading depth array: {args.depth_path}")
+    try:
+        depth_img = np.load(args.depth_path)
+    except Exception as e:
+        print(f"[ERROR] Failed to load depth array: {args.depth_path}")
+        print(f"  - {e}")
         sys.exit(1)
     
     # Load mask image
