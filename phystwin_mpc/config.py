@@ -26,7 +26,7 @@ class TaskConfig:
 class QQTTDynamicsConfig:
     base_path: str = "phystwin_assets/different_types"
     # single_lift_rope or single_lift_cloth_1
-    case_name: str = "single_lift_cloth_1"
+    case_name: str = "single_lift_rope"
     experiments_path: str = "phystwin_assets/experiments"
     experiments_optimization_path: str = "phystwin_assets/experiments_optimization"
     output_dir: str = "outputs_exp"
@@ -48,8 +48,10 @@ def build_plan_config(task: str, seed: int, max_points: int) -> PlanningConfig:
     # TODO: adjust bbox for different tasks
     if task == "rope":
         bbox = np.array([[0.0, 0.6], [-0.35, 0.45], [-0.65, 0.05]], dtype=np.float32)
+        case_name = "single_lift_rope"
     elif task == "cloth":
         bbox = np.array([[0.0, 0.7], [-0.35, 0.45], [-0.8, 0.0]], dtype=np.float32)
+        case_name = "single_lift_cloth_1"
     else:
         raise ValueError(f"Unknown task: {task}")
 
@@ -64,5 +66,5 @@ def build_plan_config(task: str, seed: int, max_points: int) -> PlanningConfig:
         max_points=max_points,
         mppi=MPPIConfig(),
         task=task_cfg,
-        qqtt_dynamics=QQTTDynamicsConfig(),
+        qqtt_dynamics=QQTTDynamicsConfig(case_name=case_name),
     )
