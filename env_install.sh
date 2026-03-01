@@ -30,3 +30,9 @@ pip install --no-build-isolation git+https://github.com/IDEA-Research/Grounded-S
 pip install --no-build-isolation git+https://github.com/IDEA-Research/GroundingDINO.git
 
 pip install kornia
+
+
+# For calibration env 
+# pip uninstall opencv-python-headless 
+# pip uninstall opencv-python
+# pip install opencv-contrib-python
