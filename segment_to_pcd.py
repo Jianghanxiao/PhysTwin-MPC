@@ -14,6 +14,9 @@ import numpy as np
 import open3d as o3d
 
 
+DEFAULT_IO_DIR = "target_rope"
+
+
 def get_pcd_from_depth(depth_m: np.ndarray, intrinsic: np.ndarray) -> np.ndarray:
     """Lift depth map to camera-frame 3D points using K^{-1} (same as proj-QQTT)."""
     height, width = depth_m.shape
@@ -127,19 +130,19 @@ def main():
         description="Convert segmentation mask to point cloud"
     )
     parser.add_argument(
-        "--depth_path", type=str, default="outputs/depth.npy", help="Path to depth array (NPY) in mm"
+        "--depth_path", type=str, default=f"{DEFAULT_IO_DIR}/depth.npy", help="Path to depth array (NPY) in mm"
     )
     parser.add_argument(
-        "--mask_path", type=str, default="outputs/mask.png", help="Path to binary mask image (PNG)"
+        "--mask_path", type=str, default=f"{DEFAULT_IO_DIR}/mask.png", help="Path to binary mask image (PNG)"
     )
     parser.add_argument(
-        "--intrinsics_path", type=str, default="outputs/intrinsics.npy", help="Path to intrinsics (NPY file)"
+        "--intrinsics_path", type=str, default=f"{DEFAULT_IO_DIR}/intrinsics.npy", help="Path to intrinsics (NPY file)"
     )
     parser.add_argument(
-        "--output_path", type=str, default="outputs/object.ply", help="Path to save point cloud (PLY)"
+        "--output_path", type=str, default=f"{DEFAULT_IO_DIR}/object.ply", help="Path to save point cloud (PLY)"
     )
     parser.add_argument(
-        "--calibrate_pkl", type=str, default="outputs/calibrate.pkl", help="Path to calibrate.pkl (for extrinsics)"
+        "--calibrate_pkl", type=str, default=f"{DEFAULT_IO_DIR}/calibrate.pkl", help="Path to calibrate.pkl (for extrinsics)"
     )
     parser.add_argument(
         "--camera_idx", type=int, default=0, help="Camera index to use from calibrate.pkl"

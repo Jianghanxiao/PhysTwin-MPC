@@ -15,14 +15,12 @@ def _load_base2world_matrix(path: Path) -> np.ndarray:
     with open(path, "rb") as f:
         data = pickle.load(f)
 
-    if not isinstance(data, dict) or "base2world" not in data:
-        raise ValueError(f"PKL must be a dict containing key 'base2world': {path}")
+    mat = np.asarray(data, dtype=np.float32)
 
-    mat = np.asarray(data["base2world"], dtype=np.float32)
-
-    mat = np.asarray(mat, dtype=np.float32)
     if mat.shape != (4, 4):
-        raise ValueError(f"base2world matrix must be shape (4,4), got {mat.shape} from {path}")
+        raise ValueError(
+            f"base2world.pkl must store a raw 4x4 matrix, got {mat.shape} from {path}"
+        )
     return mat
 
 
@@ -40,7 +38,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--execute", action="store_true", help="Execute full open-loop sequence on robot")
     parser.add_argument("--save-dir", type=str, default="outputs/original")
     parser.add_argument("--max-points", type=int, default=1000)
-    parser.add_argument("--base2world", type=str, default=None, help="Path to .pkl containing {'base2world': 4x4 matrix}")
+    parser.add_argument(
+        "--base2world",
+        type=str,
+        default="base2world.pkl",
+        help="Path to base2world.pkl storing a raw 4x4 base-to-world matrix",
+    )
     return parser.parse_args()
 
 
