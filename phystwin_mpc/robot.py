@@ -100,6 +100,7 @@ class XArm7Robot:
         acc: float = 2000.0,
         gripper_enable: bool = False,
         base_to_world: np.ndarray | None = None,
+        tool_extension_m: float = 0.065,
     ) -> None:
         try:
             from xarm.wrapper import XArmAPI
@@ -112,6 +113,8 @@ class XArm7Robot:
         self.speed = float(speed)
         self.acc = float(acc)
         self.gripper_enable = bool(gripper_enable)
+        self.tool_extension_m = float(tool_extension_m)
+        self.tool_offset_local = np.array([0.0, 0.0, self.tool_extension_m], dtype=np.float32)
         if base_to_world is None:
             self.base_to_world = np.eye(4, dtype=np.float32)
         else:
@@ -134,6 +137,7 @@ class XArm7Robot:
         x_mm, y_mm, z_mm, roll, pitch, yaw = pose
         xyz_base = np.array([x_mm, y_mm, z_mm], dtype=np.float32) / 1000.0
         rot_base = _rpy_to_rotmat(float(roll), float(pitch), float(yaw))
+        xyz_base = xyz_base + rot_base @ self.tool_offset_local
         rot_world = self.base_to_world[:3, :3] @ rot_base
         xyz_world = self.base_to_world[:3, :3] @ xyz_base + self.base_to_world[:3, 3]
 
@@ -148,6 +152,7 @@ class XArm7Robot:
         for step in sequence:
             rot_base = self.world_to_base[:3, :3] @ step.rot
             xyz_base = self.world_to_base[:3, :3] @ step.xyz + self.world_to_base[:3, 3]
+            xyz_base = xyz_base - rot_base @ self.tool_offset_local
             roll, pitch, yaw = _rotmat_to_rpy(rot_base)
             xyz_mm = xyz_base * 1000.0
             code = self.arm.set_position(

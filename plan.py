@@ -34,6 +34,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--xarm-speed", type=float, default=100.0)
     parser.add_argument("--xarm-acc", type=float, default=2000.0)
     parser.add_argument("--xarm-gripper-enable", action="store_true")
+    parser.add_argument(
+        "--xarm-tool-extension-mm",
+        type=float,
+        default=65.0,
+        help="Additional tool length from xArm flange/TCP to real end-effector tip in mm",
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--execute", action="store_true", help="Execute full open-loop sequence on robot")
     parser.add_argument("--save-dir", type=str, default="outputs/plan", help="Directory to save planning results")
@@ -66,6 +72,7 @@ def main() -> None:
             acc=args.xarm_acc,
             gripper_enable=args.xarm_gripper_enable,
             base_to_world=base2world,
+            tool_extension_m=args.xarm_tool_extension_mm / 1000.0,
         )
     else:
         raise ValueError(f"Unsupported robot type: {args.robot}")
