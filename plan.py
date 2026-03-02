@@ -74,7 +74,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--execute", action="store_true", help="Execute full open-loop sequence on robot")
-    parser.add_argument("--save-dir", type=str, default="outputs/plan", help="Directory to save planning results")
+    parser.add_argument("--save-dir", type=str, default="boba_outputs/plan", help="Directory to save planning results")
     parser.add_argument("--max-points", type=int, default=1000)
     parser.add_argument(
         "--base2world",

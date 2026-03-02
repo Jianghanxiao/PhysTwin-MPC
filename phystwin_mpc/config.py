@@ -35,11 +35,11 @@ class TaskConfig:
 
 @dataclass(frozen=True)
 class QQTTDynamicsConfig:
-    base_path: str = "phystwin_assets/different_types"
+    base_path: str = "boba_assets/different_types"
     # single_lift_rope or single_lift_cloth_1
     case_name: str = "single_lift_rope"
-    experiments_path: str = "phystwin_assets/experiments"
-    experiments_optimization_path: str = "phystwin_assets/experiments_optimization"
+    experiments_path: str = "boba_assets/experiments"
+    experiments_optimization_path: str = "boba_assets/experiments_optimization"
     output_dir: str = "outputs_exp"
     cloth_config_path: str = "phystwin_mpc/qqtt/configs/cloth.yaml"
     real_config_path: str = "phystwin_mpc/qqtt/configs/real.yaml"
