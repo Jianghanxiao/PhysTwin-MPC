@@ -2,6 +2,18 @@ from dataclasses import dataclass
 import numpy as np
 
 
+# @dataclass(frozen=True)
+# class MPPIConfig:
+#     n_look_ahead: int = 120
+#     n_sample: int = 100
+#     n_update_iter: int = 20
+#     reward_weight: float = 100.0
+#     xyz_noise_level: float = 0.004
+#     quat_noise_level: float = 0.001
+#     gripper_noise_level: float = 0.0
+#     segmented_parts: int = 20
+
+
 @dataclass(frozen=True)
 class MPPIConfig:
     n_look_ahead: int = 120
@@ -11,8 +23,7 @@ class MPPIConfig:
     xyz_noise_level: float = 0.004
     quat_noise_level: float = 0.0
     gripper_noise_level: float = 0.0
-    segmented_parts: int = 4
-
+    segmented_parts: int = 10
 
 @dataclass(frozen=True)
 class TaskConfig:
@@ -50,7 +61,7 @@ def build_plan_config(task: str, seed: int, max_points: int) -> PlanningConfig:
         bbox = np.array([[0.0, 0.6], [-0.35, 0.45], [-0.65, 0.05]], dtype=np.float32)
         case_name = "single_lift_rope"
     elif task == "cloth":
-        bbox = np.array([[0.0, 0.7], [-0.35, 0.45], [-0.8, 0.0]], dtype=np.float32)
+        bbox = np.array([[0.0, 0.7], [-0.35, 0.45], [-0.8, 0.02]], dtype=np.float32)
         case_name = "single_lift_cloth_1"
     else:
         raise ValueError(f"Unknown task: {task}")
@@ -58,7 +69,7 @@ def build_plan_config(task: str, seed: int, max_points: int) -> PlanningConfig:
     task_cfg = TaskConfig(
         task=task,
         bbox=bbox,
-        eef_height_penalty_threshold=-0.02,
+        eef_height_penalty_threshold=0,
         bbox_margin=0.02,
     )
     return PlanningConfig(
