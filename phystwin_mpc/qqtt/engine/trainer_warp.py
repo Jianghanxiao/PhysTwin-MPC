@@ -1268,55 +1268,23 @@ class InvPhyTrainerWarp:
         cfg.num_substeps = round(1.0 / cfg.FPS / cfg.dt)
         cfg.collision_dist = 0.005
 
-        self.simulator = SpringMassSystemWarpAccelerate(
-            self.init_vertices,
-            self.init_springs,
-            self.init_rest_lengths,
-            self.init_masses,
-            dt=cfg.dt,
-            num_substeps=cfg.num_substeps,
-            spring_Y=cfg.init_spring_Y,
-            collide_elas=cfg.collide_elas,
-            collide_fric=cfg.collide_fric,
-            dashpot_damping=cfg.dashpot_damping,
-            drag_damping=cfg.drag_damping,
-            collide_object_elas=cfg.collide_object_elas,
-            collide_object_fric=cfg.collide_object_fric,
-            init_masks=self.init_masks,
-            collision_dist=cfg.collision_dist,
-            init_velocities=self.init_velocities,
-            num_object_points=self.num_all_points,
-            num_surface_points=self.num_surface_points,
-            num_original_points=self.num_original_points,
-            controller_points=self.controller_points,
-            reverse_z=cfg.reverse_z,
-            spring_Y_min=cfg.spring_Y_min,
-            spring_Y_max=cfg.spring_Y_max,
-            gt_object_points=self.object_points,
-            gt_object_visibilities=self.object_visibilities,
-            gt_object_motions_valid=self.object_motions_valid,
-            self_collision=cfg.self_collision,
-        )
+        # Skip creating the single-instance simulator (SpringMassSystemWarpAccelerate)
+        # since batch mode uses self.batch_simulator exclusively.
+        # Compute n_springs directly instead of going through the simulator.
+        n_springs = self.init_springs.shape[0]
 
         spring_Y = torch.cat(
             [
                 spring_Y,
                 3e4
                 * torch.ones(
-                    self.simulator.n_springs - self.num_object_springs,
+                    n_springs - self.num_object_springs,
                     dtype=torch.float32,
                     device=cfg.device,
                 ),
             ]
         )
-
-        self.simulator.set_spring_Y(torch.log(spring_Y).detach().clone())
-        self.simulator.set_collide(
-            collide_elas.detach().clone(), collide_fric.detach().clone()
-        )
-        self.simulator.set_collide_object(
-            collide_object_elas.detach().clone(), collide_object_fric.detach().clone()
-        )
+        self.simulator = None
 
         # ---- Preprocessing for batched rollout (Morton ordering + spring coloring) ----
         n_obj = int(self.num_all_points)
