@@ -3,6 +3,7 @@ outputs/
 groundedSAM_checkpoints/
 phystwin_assets/
 outputs*
+boba*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

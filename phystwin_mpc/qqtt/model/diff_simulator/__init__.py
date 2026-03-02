@@ -1,2 +1,3 @@
 from .spring_mass_warp import SpringMassSystemWarp
 from .spring_mass_warp_accelerate import SpringMassSystemWarpAccelerate
+from .spring_mass_warp_batched import SpringMassSystemWarpBatched

@@ -215,6 +215,32 @@ class PhysDynamicModule:
 
         return all_pts
 
+    def rollout_batch(self, eef_xyz, eef_rot, visualize=False, return_trajectory=False):
+        batch_size = eef_xyz.shape[0]
+        with wp.ScopedTimer("rollout_batch"):
+            controller_points_array = torch.einsum(
+                "btgij,nj->btgni",
+                eef_rot.permute(0, 1, 2, 4, 3),
+                self.controller_points_position,
+            )
+            controller_points_array = (
+                controller_points_array + eef_xyz[:, :, :, None, :]
+            )
+            controller_points_array = torch.reshape(
+                controller_points_array,
+                [batch_size, controller_points_array.shape[1], -1, 3],
+            )
+            controller_points_array = controller_points_array.to(
+                dtype=torch.float32, device=self.device
+            ).contiguous()
+
+            pts = self.trainer.rollout_batch(
+                controller_points_array,
+                visualize=visualize,
+                return_trajectory=return_trajectory,
+            )
+        return pts
+
 
 class QQTTDynamicsModule:
 
@@ -290,12 +316,12 @@ class QQTTDynamicsModule:
         controller_rots = eef_rot[:, 1:]
         print("Finish initialization!!!!!!!!!!!!!!!!!!!!")
 
-        results = self.dynamics_module.rollout_serialize(
+        results = self.dynamics_module.rollout_batch(
             controller_xyzs, controller_rots,
             visualize=visualize_pv,
             return_trajectory=return_trajectory,
         )
-        x = torch.stack(results, dim=0)
+        x = results
         if not return_trajectory:
             x = x[:, None]
 
