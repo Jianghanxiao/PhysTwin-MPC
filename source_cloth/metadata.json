@@ -1,0 +1,8 @@
+{
+  "num_cam": 1,
+  "saved_files": [
+    "color.png",
+    "depth.npy",
+    "intrinsics.npy"
+  ]
+}
