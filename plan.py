@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Root-level clean QQTT-style open-loop planner")
     parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="rope")
     parser.add_argument("--current-pcd", type=str, default="source_rope/object.ply", help="Current object point cloud file")
-    parser.add_argument("--target-pcd", type=str, default="target_rope/object.ply", help="Target object point cloud file")
+    parser.add_argument("--target-pcd", type=str, default="target_rope_boba/object.ply", help="Target object point cloud file")
     parser.add_argument("--robot", type=str, choices=["mock", "xarm7"], default="mock")
     parser.add_argument("--xarm-ip", type=str, default="192.168.1.196")
     parser.add_argument("--xarm-speed", type=float, default=100.0)

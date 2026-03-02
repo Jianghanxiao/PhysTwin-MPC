@@ -14,7 +14,7 @@ import numpy as np
 import open3d as o3d
 
 
-DEFAULT_IO_DIR = "source_rope"
+DEFAULT_IO_DIR = "target_rope_boba"
 
 
 def get_pcd_from_depth(depth_m: np.ndarray, intrinsic: np.ndarray) -> np.ndarray:
@@ -148,7 +148,7 @@ def main():
         "--camera_idx", type=int, default=0, help="Camera index to use from calibrate.pkl"
     )
     parser.add_argument(
-        "--voxel_size", type=float, default=0.005, help="Voxel size for downsampling (m)"
+        "--voxel_size", type=float, default=0.01, help="Voxel size for downsampling (m)"
     )
     parser.add_argument(
         "--visualize", action="store_true", help="Visualize point cloud"
