@@ -106,6 +106,12 @@ def parse_args() -> argparse.Namespace:
         default="source_rope/color.png",
         help="RGB image path for white-background compositing (default: source_rope/color.png)",
     )
+    parser.add_argument(
+        "--mock-saved-pose",
+        type=str,
+        default="./rope.npz",
+        help="Path to saved pose file for MockRobot (expanded)",
+    )
     return parser.parse_args()
 
 
@@ -122,7 +128,7 @@ def main() -> None:
     )
 
     if args.robot == "mock":
-        robot = MockRobot()
+        robot = MockRobot(saved_pose_path=args.mock_saved_pose)
     elif args.robot == "xarm7":
         base2world = None
         if args.base2world:

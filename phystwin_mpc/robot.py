@@ -5,6 +5,7 @@ from typing import Callable, Protocol
 import math
 import time
 import numpy as np
+import os
 
 
 @dataclass
@@ -27,29 +28,6 @@ class BaseRobot(Protocol):
 
     def execute_action_sequence(self, sequence: list[ActionStep]) -> None:
         ...
-
-
-class MockRobot:
-    def __init__(self) -> None:
-        self._pose = RobotPose(
-            xyz=np.array([0.35, 0.0, -0.25], dtype=np.float32),
-            rot=np.eye(3, dtype=np.float32),
-            gripper=0.2,
-        )
-
-    def get_current_pose(self) -> RobotPose:
-        return RobotPose(
-            xyz=self._pose.xyz.copy(),
-            rot=self._pose.rot.copy(),
-            gripper=float(self._pose.gripper),
-        )
-
-    def execute_action_sequence(self, sequence: list[ActionStep]) -> None:
-        for i, step in enumerate(sequence):
-            self._pose = RobotPose(step.xyz.copy(), step.rot.copy(), float(step.gripper))
-            print(
-                f"[MockRobot] step={i:03d} xyz={np.round(step.xyz, 4).tolist()} gripper={step.gripper:.3f}"
-            )
 
 
 class CallbackRobotAdapter:
@@ -247,7 +225,7 @@ class XArm7Robot:
                 code = self._set_servo_cartesian_compat(interp.tolist())
                 if code != 0:
                     self.arm.set_mode(0)
-                    self.arm.set_state(state=0)
+                    self.arm.set_state(0)
                     fallback = self.arm.set_position(
                         x=float(target_pose[0]),
                         y=float(target_pose[1]),
@@ -275,3 +253,49 @@ class XArm7Robot:
 
         self.arm.set_mode(0)
         self.arm.set_state(state=0)
+
+
+class MockRobot:
+    """A lightweight stand-in for XArm7Robot that loads a saved world-frame
+    pose from an ``.npz`` file (as produced by ``save_xarm_pose.py``).
+
+    The saved file already stores xyz / rot / gripper in **world coordinates**
+    (the same frame that ``XArm7Robot.get_current_pose`` returns), so no
+    additional coordinate transforms are needed.
+
+    ``execute_action_sequence`` is a no-op — MockRobot is only used to provide
+    the initial end-effector pose to the planner.
+    """
+
+    def __init__(self, saved_pose_path: str) -> None:
+        if not os.path.exists(saved_pose_path):
+            raise FileNotFoundError(f"saved_pose_path '{saved_pose_path}' does not exist")
+
+        data = np.load(saved_pose_path, allow_pickle=False)
+        try:
+            xyz = np.asarray(data["xyz"], dtype=np.float32)
+            rot = np.asarray(data["rot"], dtype=np.float32)
+            gripper = float(data["gripper"])
+        except KeyError as e:
+            raise ValueError(
+                f"saved_pose_path '{saved_pose_path}' must contain 'xyz', 'rot', 'gripper' arrays: {e}"
+            )
+
+        if xyz.shape != (3,):
+            raise ValueError(f"xyz must be shape (3,), got {xyz.shape}")
+        if rot.shape != (3, 3):
+            raise ValueError(f"rot must be shape (3,3), got {rot.shape}")
+
+        # Store the world-frame pose exactly as saved (no transforms).
+        self._pose = RobotPose(xyz=xyz.copy(), rot=rot.copy(), gripper=gripper)
+
+    def get_current_pose(self) -> RobotPose:
+        return RobotPose(
+            xyz=self._pose.xyz.copy(),
+            rot=self._pose.rot.copy(),
+            gripper=float(self._pose.gripper),
+        )
+
+    def execute_action_sequence(self, sequence: list[ActionStep]) -> None:
+        # MockRobot does not physically execute anything.
+        pass
