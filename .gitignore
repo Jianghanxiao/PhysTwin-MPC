@@ -1,6 +1,9 @@
 backup_mpc/
 outputs/
 groundedSAM_checkpoints/
+boba_assets/
+phystwin_assets/
+boba_phystwin/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
