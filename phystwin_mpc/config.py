@@ -2,28 +2,28 @@ from dataclasses import dataclass
 import numpy as np
 
 
-# @dataclass(frozen=True)
-# class MPPIConfig:
-#     n_look_ahead: int = 120
-#     n_sample: int = 100
-#     n_update_iter: int = 20
-#     reward_weight: float = 100.0
-#     xyz_noise_level: float = 0.004
-#     quat_noise_level: float = 0.001
-#     gripper_noise_level: float = 0.0
-#     segmented_parts: int = 20
-
-
 @dataclass(frozen=True)
 class MPPIConfig:
     n_look_ahead: int = 120
-    n_sample: int = 20
-    n_update_iter: int = 10
+    n_sample: int = 100
+    n_update_iter: int = 25
     reward_weight: float = 100.0
     xyz_noise_level: float = 0.004
     quat_noise_level: float = 0.0
     gripper_noise_level: float = 0.0
     segmented_parts: int = 10
+
+
+# @dataclass(frozen=True)
+# class MPPIConfig:
+#     n_look_ahead: int = 120
+#     n_sample: int = 20
+#     n_update_iter: int = 10
+#     reward_weight: float = 100.0
+#     xyz_noise_level: float = 0.004
+#     quat_noise_level: float = 0.0
+#     gripper_noise_level: float = 0.0
+#     segmented_parts: int = 10
 
 @dataclass(frozen=True)
 class TaskConfig:
