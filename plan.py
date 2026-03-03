@@ -58,9 +58,9 @@ def _load_camera_intrinsic(path: Path, camera_idx: int) -> np.ndarray:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Root-level clean QQTT-style open-loop planner")
-    parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="rope")
-    parser.add_argument("--current-pcd", type=str, default="source_rope/object.ply", help="Current object point cloud file")
-    parser.add_argument("--target-pcd", type=str, default="target_rope/object.ply", help="Target object point cloud file")
+    parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="cloth")
+    parser.add_argument("--current-pcd", type=str, default="source_cloth/object.ply", help="Current object point cloud file")
+    parser.add_argument("--target-pcd", type=str, default="target_cloth/object.ply", help="Target object point cloud file")
     parser.add_argument("--robot", type=str, choices=["mock", "xarm7"], default="mock")
     parser.add_argument("--xarm-ip", type=str, default="192.168.1.196")
     parser.add_argument("--xarm-speed", type=float, default=100.0)
@@ -85,7 +85,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--video-calibrate-pkl",
         type=str,
-        default="source_rope/calibrate.pkl",
+        default="source_cloth/calibrate.pkl",
         help="Path to calibrate.pkl for rollout video camera extrinsic (required for camera-matched rendering)",
     )
     parser.add_argument(
@@ -97,14 +97,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--video-intrinsics-npy",
         type=str,
-        default="source_rope/intrinsics.npy",
+        default="source_cloth/intrinsics.npy",
         help="Path to intrinsics.npy for rollout video camera intrinsic (required for camera-matched rendering)",
     )
     parser.add_argument(
         "--video-overlay-image",
         type=str,
-        default="source_rope/color.png",
-        help="RGB image path for white-background compositing (default: source_rope/color.png)",
+        default="source_cloth/color.png",
+        help="RGB image path for white-background compositing (default: source_cloth/color.png)",
     )
     return parser.parse_args()
 
