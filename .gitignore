@@ -4,6 +4,8 @@ groundedSAM_checkpoints/
 boba_assets/
 phystwin_assets/
 boba_phystwin/
+outputs*
+boba*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

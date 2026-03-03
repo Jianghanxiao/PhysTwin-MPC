@@ -55,6 +55,8 @@ class PhysDynamicModule:
         init_controller_rot,
         action_num,
         batch_size,
+        cloth_config_path,
+        real_config_path,
         device="cuda",
     ):
         seed = 42
@@ -63,11 +65,11 @@ class PhysDynamicModule:
         self.batch_size = batch_size
 
         if "cloth" in case_name or "package" in case_name:
-            cfg.load_from_yaml("experiments/real_world/qqtt/configs/cloth.yaml")
+            cfg.load_from_yaml(cloth_config_path)
         else:
-            cfg.load_from_yaml("experiments/real_world/qqtt/configs/real.yaml")
+            cfg.load_from_yaml(real_config_path)
 
-        base_dir = f"{output_dir}/{case_name}"
+        base_dir = str(Path(output_dir))
 
         optimal_path = f"{experiments_optimization_path}/{case_name}/optimal_params.pkl"
         logger.info(f"Load optimal parameters from: {optimal_path}")
@@ -168,7 +170,7 @@ class PhysDynamicModule:
             controller_meshes = []
             # Use sphere mesh for each controller point
             for j in range(self.init_controller_points.shape[0]):
-                origin = self.init_controller_points[j]
+                origin = self.init_controller_points[j].detach().cpu().numpy().astype(np.float64)
                 origin_color = [1, 0, 0]
                 controller_mesh = o3d.geometry.TriangleMesh.create_sphere(
                     radius=0.01
@@ -176,14 +178,15 @@ class PhysDynamicModule:
                 controller_mesh.compute_vertex_normals()
                 controller_mesh.paint_uniform_color(origin_color)
                 controller_meshes.append(controller_mesh)
+            
+            coordinate = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
 
-            o3d.visualization.draw_geometries([source, target, controller_meshes])
+            o3d.visualization.draw_geometries([source, target, *controller_meshes, coordinate])
 
         return final_points
 
-    def rollout_serialize(self, eef_xyz, eef_rot, visualize=False):
+    def rollout_serialize(self, eef_xyz, eef_rot, visualize=False, return_trajectory=False):
         batch_size = eef_xyz.shape[0]
-        assert batch_size == self.batch_size
         all_pts = []
 
         for i in range(batch_size):
@@ -203,7 +206,11 @@ class PhysDynamicModule:
                     controller_points_array, dtype=torch.float, device=self.device
                 ).contiguous()
                 # TODO: can use rollout_no_acc
-                pts = self.trainer.rollout(controller_points_array, visualize=(visualize and i < 10))
+                pts = self.trainer.rollout(
+                    controller_points_array,
+                    visualize=(visualize and i < 10),
+                    return_trajectory=return_trajectory,
+                )
                 all_pts.append(pts.clone())
 
         return all_pts
@@ -211,12 +218,32 @@ class PhysDynamicModule:
 
 class QQTTDynamicsModule:
 
-    def __init__(self, batch_size, num_steps_total):
+    def __init__(
+        self,
+        batch_size,
+        num_steps_total,
+        base_path,
+        case_name,
+        experiments_path,
+        experiments_optimization_path,
+        output_dir,
+        cloth_config_path,
+        real_config_path,
+        device="cuda",
+    ):
 
         self.dynamics_module = None
 
         self.batch_size = batch_size
         self.action_num = num_steps_total + 1
+        self.base_path = base_path
+        self.case_name = case_name
+        self.experiments_path = experiments_path
+        self.experiments_optimization_path = experiments_optimization_path
+        self.output_dir = output_dir
+        self.cloth_config_path = cloth_config_path
+        self.real_config_path = real_config_path
+        self.device = device
 
     def reset_model(self, x=None):
         return
@@ -227,7 +254,7 @@ class QQTTDynamicsModule:
     def reset_downsample_indices(self, pts, uniform=True):
         pass
 
-    def rollout(self, pts, eef_xyz, eef_rot, eef_gripper, pts_his=None, visualize_pv=False):
+    def rollout(self, pts, eef_xyz, eef_rot, eef_gripper, pts_his=None, visualize_pv=False, return_trajectory=False):
 
         assert eef_xyz.shape[1] == self.action_num
         assert eef_rot.shape[1] == self.action_num
@@ -243,18 +270,20 @@ class QQTTDynamicsModule:
             init_controller_rot = eef_rot[0, 0].cpu().numpy()
 
             self.dynamics_module = PhysDynamicModule(
-                base_path="experiments/log/data/robot_data/different_types",
-                case_name="single_lift_cloth_1",
-                experiments_path="experiments/log/data/robot_data/experiments",
-                experiments_optimization_path="experiments/log/data/robot_data/experiments_optimization",
-                output_dir="experiments/log/data/robot_data/temp_experiments",
+                base_path=self.base_path,
+                case_name=self.case_name,
+                experiments_path=self.experiments_path,
+                experiments_optimization_path=self.experiments_optimization_path,
+                output_dir=self.output_dir,
                 init_pts=init_pts,
                 init_colors=init_colors,
                 init_controller_xyz=init_controller_xyz,
                 init_controller_rot=init_controller_rot,
                 action_num=self.action_num,
                 batch_size=self.batch_size,
-                device="cuda",
+                cloth_config_path=self.cloth_config_path,
+                real_config_path=self.real_config_path,
+                device=self.device,
             )
 
         controller_xyzs = eef_xyz[:, 1:]
@@ -264,9 +293,11 @@ class QQTTDynamicsModule:
         results = self.dynamics_module.rollout_serialize(
             controller_xyzs, controller_rots,
             visualize=visualize_pv,
+            return_trajectory=return_trajectory,
         )
         x = torch.stack(results, dim=0)
-        x = x[:, None]
+        if not return_trajectory:
+            x = x[:, None]
 
         v = torch.zeros_like(x)
         return x, v

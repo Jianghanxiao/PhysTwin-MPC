@@ -18,6 +18,7 @@ pip install wandb
 pip install moviepy imageio
 conda install -y opencv
 pip install cma
+pip install xarm-python-sdk 
 
 # Install the env for realsense camera
 pip install Cython

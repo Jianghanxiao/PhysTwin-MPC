@@ -1145,7 +1145,7 @@ class InvPhyTrainerWarp:
             collide_object_elas.detach().clone(), collide_object_fric.detach().clone()
         )
 
-    def rollout(self, controller_points_array, visualize=False):
+    def rollout(self, controller_points_array, visualize=False, return_trajectory=False):
         self.simulator.reset_idx()
 
         self.simulator.set_init_state(
@@ -1231,6 +1231,10 @@ class InvPhyTrainerWarp:
             )
 
         action_num = controller_points_array.shape[0]
+        trajectory = None
+        if return_trajectory:
+            x0 = wp.to_torch(self.simulator.wp_states[0].wp_x, requires_grad=False)
+            trajectory = [x0.detach().clone()]
         for i in range(action_num):
 
             if self.simulator.object_collision_flag:
@@ -1238,6 +1242,8 @@ class InvPhyTrainerWarp:
             wp.capture_launch(self.simulator.forward_graph)
 
             x = wp.to_torch(self.simulator.wp_states[-1].wp_x, requires_grad=False)
+            if return_trajectory:
+                trajectory.append(x.detach().clone())
             if visualize:
                 # add the visualization code here
                 vis_vertices = x.cpu().numpy()
@@ -1256,6 +1262,8 @@ class InvPhyTrainerWarp:
                 vis.update_renderer()
 
         x = wp.to_torch(self.simulator.wp_states[-1].wp_x, requires_grad=False)
+        if return_trajectory:
+            return torch.stack(trajectory, dim=0)
         return x
 
     def rollout_no_acc(self, controller_points_array, visualize=False):
