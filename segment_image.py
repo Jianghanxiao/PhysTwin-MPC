@@ -161,12 +161,12 @@ def main():
         description="Segment image using SAM2 and Grounding DINO"
     )
     parser.add_argument(
-        "--img_path", type=str, default="target_rope/color.png", help="Path to input image"
+        "--img_path", type=str, default="source_rope/color.png", help="Path to input image"
     )
     parser.add_argument(
         "--output_path",
         type=str,
-        default="target_rope/color_segmented.png",
+        default="source_rope/color_segmented.png",
         help="Path to save segmented image",
     )
     parser.add_argument(
