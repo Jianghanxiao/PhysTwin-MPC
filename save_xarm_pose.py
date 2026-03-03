@@ -20,7 +20,7 @@ import numpy as np
 import os
 from phystwin_mpc.robot import XArm7Robot
 
-DEFAULT_OUT = "./rope.npz"
+DEFAULT_OUT = "./cloth.npz"
 
 
 def _load_base2world_matrix(path: Path) -> np.ndarray:

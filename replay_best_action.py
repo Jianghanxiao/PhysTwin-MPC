@@ -84,7 +84,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--action-file",
         type=str,
-        default="outputs/plan_sparse/best_action_sequence.npy",
+        default="results_rope/plan/best_action_sequence.npy",
         help="Path to best action sequence (.npy or .json)",
     )
     parser.add_argument("--xarm-ip", type=str, default="192.168.1.196")
