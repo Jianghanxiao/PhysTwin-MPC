@@ -8,6 +8,7 @@ outputs*
 boba*
 backup*
 phystwin_dataset_assets/
+reference_code/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -5,6 +5,25 @@ from ..utils import logger, visualize_pc, cfg
 import matplotlib.pyplot as plt
 
 
+REF_T_MARKER2WORLD = np.array(
+    [
+        [9.92500579e-01, -1.22225711e-01, 1.86443478e-03, 1.36186366e-01],
+        [5.43975403e-04, -1.08359291e-02, -9.99941142e-01, -1.88119571e-02],
+        [1.22238720e-01, 9.92443176e-01, -1.06881781e-02, 7.19721945e-02],
+        [0.0, 0.0, 0.0, 1.0],
+    ],
+    dtype=np.float64,
+)
+
+
+def _apply_rigid_transform(points, transform):
+    original_shape = points.shape
+    points_flat = points.reshape(-1, 3)
+    points_homogeneous = np.hstack((points_flat, np.ones((points_flat.shape[0], 1))))
+    transformed = (transform @ points_homogeneous.T).T[:, :3]
+    return transformed.reshape(original_shape)
+
+
 class RealData:
     def __init__(self, visualize=False, save_gt=True):
         logger.info(f"[DATA]: loading data from {cfg.data_path}")
@@ -13,6 +32,10 @@ class RealData:
         with open(self.data_path, "rb") as f:
             data = pickle.load(f)
 
+        self.T_world2marker = np.linalg.inv(REF_T_MARKER2WORLD)
+        cfg.T_world2marker = self.T_world2marker
+        logger.info("[DATA]: using hardcoded reference T_world2marker")
+
         object_points = data["object_points"]
         object_colors = data["object_colors"]
         object_visibilities = data["object_visibilities"]
@@ -20,6 +43,17 @@ class RealData:
         controller_points = data["controller_points"]
         other_surface_points = data["surface_points"]
         interior_points = data["interior_points"]
+
+        object_points = _apply_rigid_transform(object_points, self.T_world2marker)
+        controller_points = _apply_rigid_transform(
+            controller_points, self.T_world2marker
+        )
+        other_surface_points = _apply_rigid_transform(
+            other_surface_points, self.T_world2marker
+        )
+        interior_points = _apply_rigid_transform(
+            interior_points, self.T_world2marker
+        )
 
         # Get the rainbow color for the object_colors
         y_min, y_max = np.min(object_points[0, :, 1]), np.max(object_points[0, :, 1])
