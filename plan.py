@@ -58,7 +58,19 @@ def _load_camera_intrinsic(path: Path, camera_idx: int) -> np.ndarray:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Root-level clean QQTT-style open-loop planner")
-    parser.add_argument("--task", type=str, choices=["rope", "cloth"], default="cloth")
+    parser.add_argument("--task", type=str, choices=["rope", "cloth", "bear"], default="cloth")
+    parser.add_argument(
+        "--dataset-root",
+        type=str,
+        default="phystwin_dataset_assets",
+        help="Dataset root containing different_types/experiments/experiments_optimization",
+    )
+    parser.add_argument(
+        "--case-name",
+        type=str,
+        default=None,
+        help="Optional explicit case folder name (e.g. rope_0). If omitted, auto-selected from task keyword.",
+    )
     parser.add_argument("--current-pcd", type=str, default="source_cloth/object.ply", help="Current object point cloud file")
     parser.add_argument("--target-pcd", type=str, default="target_cloth/object.ply", help="Target object point cloud file")
     parser.add_argument("--robot", type=str, choices=["mock", "xarm7"], default="mock")
@@ -121,11 +133,18 @@ def main() -> None:
     save_dir = Path(args.save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
 
-    config = build_plan_config(task=args.task, seed=args.seed, max_points=args.max_points)
+    config = build_plan_config(
+        task=args.task,
+        seed=args.seed,
+        max_points=args.max_points,
+        dataset_root=args.dataset_root,
+        case_name=args.case_name,
+    )
     config = replace(
         config,
         qqtt_dynamics=replace(config.qqtt_dynamics, output_dir=str(save_dir)),
     )
+    print(f"[Dataset] root={args.dataset_root}, task={args.task}, case={config.qqtt_dynamics.case_name}")
 
     if args.robot == "mock":
         robot = MockRobot(saved_pose_path=args.mock_saved_pose)
