@@ -636,7 +636,11 @@ class SpringMassSystemWarp:
         self.num_control_points = (
             controller_points.shape[1] if not controller_points is None else 0
         )
-        self.controller_points = controller_points
+        self.controller_points = (
+            controller_points.contiguous()
+            if torch.is_tensor(controller_points)
+            else controller_points
+        )
 
         # Deal with the any collision detection
         self.object_collision_flag = 0
@@ -672,10 +676,14 @@ class SpringMassSystemWarp:
             )
 
         # Initialize the GT for calculating losses
-        self.gt_object_points = gt_object_points
+        self.gt_object_points = (
+            gt_object_points.contiguous()
+            if torch.is_tensor(gt_object_points)
+            else gt_object_points
+        )
         if cfg.data_type == "real":
-            self.gt_object_visibilities = gt_object_visibilities.int()
-            self.gt_object_motions_valid = gt_object_motions_valid.int()
+            self.gt_object_visibilities = gt_object_visibilities.int().contiguous()
+            self.gt_object_motions_valid = gt_object_motions_valid.int().contiguous()
 
         self.num_surface_points = num_surface_points
         self.num_original_points = num_original_points
@@ -697,16 +705,18 @@ class SpringMassSystemWarp:
             self.acc_count = wp.zeros(1, dtype=wp.int32, requires_grad=False)
 
         self.wp_current_object_points = wp.from_torch(
-            self.gt_object_points[1].clone(), dtype=wp.vec3, requires_grad=False
+            self.gt_object_points[1].clone().contiguous(),
+            dtype=wp.vec3,
+            requires_grad=False,
         )
         if cfg.data_type == "real":
             self.wp_current_object_visibilities = wp.from_torch(
-                self.gt_object_visibilities[1].clone(),
+                self.gt_object_visibilities[1].clone().contiguous(),
                 dtype=wp.int32,
                 requires_grad=False,
             )
             self.wp_current_object_motions_valid = wp.from_torch(
-                self.gt_object_motions_valid[0].clone(),
+                self.gt_object_motions_valid[0].clone().contiguous(),
                 dtype=wp.int32,
                 requires_grad=False,
             )
@@ -714,10 +724,14 @@ class SpringMassSystemWarp:
             self.num_valid_motions = int(self.gt_object_motions_valid[0].sum())
 
             self.wp_original_control_point = wp.from_torch(
-                self.controller_points[0].clone(), dtype=wp.vec3, requires_grad=False
+                self.controller_points[0].clone().contiguous(),
+                dtype=wp.vec3,
+                requires_grad=False,
             )
             self.wp_target_control_point = wp.from_torch(
-                self.controller_points[1].clone(), dtype=wp.vec3, requires_grad=False
+                self.controller_points[1].clone().contiguous(),
+                dtype=wp.vec3,
+                requires_grad=False,
             )
 
             self.chamfer_loss = wp.zeros(1, dtype=wp.float32, requires_grad=True)
