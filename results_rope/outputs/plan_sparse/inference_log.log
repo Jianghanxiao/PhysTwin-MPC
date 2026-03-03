@@ -1,0 +1,4 @@
+2026-03-01 23:01:03,076 [   INFO] [DATA]: loading data from phystwin_assets/different_types/single_lift_rope/final_data.pkl
+2026-03-01 23:01:03,380 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-01 23:01:05,653 [   INFO] Load model from phystwin_assets/experiments/single_lift_rope/train/best_199.pth
+2026-03-01 23:01:05,665 [   INFO] [SIMULATION]: Initialize the Spring-Mass System

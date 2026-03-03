@@ -1,0 +1,16 @@
+{
+  "task": "rope",
+  "best_reward": -0.02367197349667549,
+  "final_chamfer": 0.02367197349667549,
+  "horizon": 120,
+  "n_sample": 100,
+  "n_update_iter": 25,
+  "timing": {
+    "total_seconds": 95.86715397701482,
+    "load_pcd_seconds": 0.00017821197980083525,
+    "plan_seconds": 87.60655409199535,
+    "rollout_seconds": 2.004948561982019,
+    "visualize_seconds": 6.2515206249954645,
+    "execute_seconds": 0.0
+  }
+}

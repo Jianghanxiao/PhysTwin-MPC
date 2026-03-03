@@ -1,0 +1,15 @@
+2026-03-02 00:05:16,717 [   INFO] [DATA]: loading data from boba_assets/different_types/single_lift_rope/final_data.pkl
+2026-03-02 00:05:16,771 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 00:05:20,454 [   INFO] Load model from boba_assets/experiments/single_lift_rope/train/best_199.pth
+2026-03-02 00:05:20,460 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 00:05:20,711 [   INFO] Applying Morton ordering + spring coloring for batched rollout...
+2026-03-02 00:05:20,822 [   INFO] Edge coloring: 64 colors assigned
+2026-03-02 00:05:21,005 [   INFO] [SIMULATION]: Initialize Batched Spring-Mass System (instances=100, obj_nodes=432, ctrl_nodes=8)
+2026-03-02 00:06:47,717 [   INFO] [SIMULATION]: Initialize Batched Spring-Mass System (instances=1, obj_nodes=432, ctrl_nodes=8)
+2026-03-02 00:25:30,912 [   INFO] [DATA]: loading data from boba_assets/different_types/single_lift_rope/final_data.pkl
+2026-03-02 00:25:30,966 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 00:25:32,929 [   INFO] Load model from boba_assets/experiments/single_lift_rope/train/best_199.pth
+2026-03-02 00:25:32,956 [   INFO] Applying Morton ordering + spring coloring for batched rollout...
+2026-03-02 00:25:33,073 [   INFO] Edge coloring: 64 colors assigned
+2026-03-02 00:25:33,255 [   INFO] [SIMULATION]: Initialize Batched Spring-Mass System (instances=100, obj_nodes=432, ctrl_nodes=8)
+2026-03-02 00:26:58,450 [   INFO] [SIMULATION]: Initialize Batched Spring-Mass System (instances=1, obj_nodes=432, ctrl_nodes=8)
