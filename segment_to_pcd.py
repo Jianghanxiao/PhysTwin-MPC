@@ -14,7 +14,7 @@ import numpy as np
 import open3d as o3d
 
 
-DEFAULT_IO_DIR = "target_rope"
+DEFAULT_IO_DIR = "target_cloth"
 
 
 def get_pcd_from_depth(depth_m: np.ndarray, intrinsic: np.ndarray) -> np.ndarray:
