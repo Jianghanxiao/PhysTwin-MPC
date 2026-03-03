@@ -1,0 +1,1 @@
+Calculate it again. 18.5h for 4 iteration, estimated 25 iteration, totally 6937.5min. The speed up is 2665.58x for self-collision enabled

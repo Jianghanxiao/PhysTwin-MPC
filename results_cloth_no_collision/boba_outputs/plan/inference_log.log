@@ -1,0 +1,7 @@
+2026-03-03 16:32:33,073 [   INFO] [DATA]: loading data from boba_assets/different_types/single_lift_cloth_1/final_data.pkl
+2026-03-03 16:32:33,190 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-03 16:32:35,409 [   INFO] Load model from boba_assets/experiments/single_lift_cloth_1/train/best_99.pth
+2026-03-03 16:32:35,442 [   INFO] Applying Morton ordering + spring coloring for batched rollout...
+2026-03-03 16:32:35,652 [   INFO] Edge coloring: 38 colors assigned
+2026-03-03 16:32:35,883 [   INFO] [SIMULATION]: Initialize Batched Spring-Mass System (instances=100, obj_nodes=1196, ctrl_nodes=8)
+2026-03-03 16:34:38,179 [   INFO] [SIMULATION]: Initialize Batched Spring-Mass System (instances=1, obj_nodes=1196, ctrl_nodes=8)

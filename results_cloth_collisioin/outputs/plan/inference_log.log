@@ -1,0 +1,12 @@
+2026-03-02 20:25:31,473 [   INFO] [DATA]: loading data from phystwin_assets/different_types/single_lift_cloth_1/final_data.pkl
+2026-03-02 20:25:31,769 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 20:25:35,334 [   INFO] Load model from phystwin_assets/experiments/single_lift_cloth_1/train/best_0.pth
+2026-03-02 20:25:35,374 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 20:27:40,465 [   INFO] [DATA]: loading data from phystwin_assets/different_types/single_lift_cloth_1/final_data.pkl
+2026-03-02 20:27:40,784 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 20:27:42,631 [   INFO] Load model from phystwin_assets/experiments/single_lift_cloth_1/train/best_0.pth
+2026-03-02 20:27:42,670 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 20:33:14,956 [   INFO] [DATA]: loading data from phystwin_assets/different_types/single_lift_cloth_1/final_data.pkl
+2026-03-02 20:33:15,256 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
+2026-03-02 20:33:18,757 [   INFO] Load model from phystwin_assets/experiments/single_lift_cloth_1/train/best_0.pth
+2026-03-02 20:33:18,798 [   INFO] [SIMULATION]: Initialize the Spring-Mass System
