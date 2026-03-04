@@ -1,0 +1,16 @@
+{
+  "task": "cloth",
+  "best_reward": -0.015313039533793926,
+  "final_chamfer": 0.015313039533793926,
+  "horizon": 120,
+  "n_sample": 20,
+  "n_update_iter": 10,
+  "timing": {
+    "total_seconds": 408.74707849300466,
+    "load_pcd_seconds": 0.00048103599692694843,
+    "plan_seconds": 400.51352872900316,
+    "rollout_seconds": 1.9746744919975754,
+    "visualize_seconds": 6.254610675998265,
+    "execute_seconds": 0.0
+  }
+}
