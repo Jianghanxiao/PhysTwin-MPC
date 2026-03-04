@@ -142,9 +142,10 @@ class PhysDynamicModule:
         )
 
     def align(self, to_pts, to_colors, from_pts, from_colors, visualize=False):
-        source = o3d.geometry.PointCloud()
-        source.points = o3d.utility.Vector3dVector(from_pts)
-        source.colors = o3d.utility.Vector3dVector(from_colors)
+        source_full = o3d.geometry.PointCloud()
+        source_full.points = o3d.utility.Vector3dVector(from_pts)
+        source_full.colors = o3d.utility.Vector3dVector(from_colors)
+        source = source_full.voxel_down_sample(voxel_size=0.01)
         target = o3d.geometry.PointCloud()
         target.points = o3d.utility.Vector3dVector(to_pts)
         target.colors = o3d.utility.Vector3dVector(to_colors)
@@ -164,7 +165,7 @@ class PhysDynamicModule:
             o3d.pipelines.registration.TransformationEstimationPointToPoint(),
         )
 
-        final_points = np.array(source.transform(reg_p2p.transformation).points)
+        final_points = np.array(source_full.transform(reg_p2p.transformation).points)
 
         if visualize:
             controller_meshes = []

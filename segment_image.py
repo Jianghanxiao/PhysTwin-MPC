@@ -161,16 +161,16 @@ def main():
         description="Segment image using SAM2 and Grounding DINO"
     )
     parser.add_argument(
-        "--img_path", type=str, default="target_cloth/color.png", help="Path to input image"
+        "--img_path", type=str, default="target_bear/color.png", help="Path to input image"
     )
     parser.add_argument(
         "--output_path",
         type=str,
-        default="target_cloth/color_segmented.png",
+        default="target_bear/color_segmented.png",
         help="Path to save segmented image",
     )
     parser.add_argument(
-        "--text_prompt", type=str, default="cloth.", help="Text description of object"
+        "--text_prompt", type=str, default="toy.", help="Text description of object"
     )
     parser.add_argument(
         "--visualize", action="store_true", help="Visualize results"
