@@ -1,27 +1,5 @@
 # PhysTwin-MPC
 
-## Whole Process
-'''
-# Calibrate the camera
-python calibrate_cameras.py
+The main logic is implemented in plan.py, which demonstrates how to leverage PhysTwin to perform MPPI planning given the current observation and the target point cloud.
 
-# Capture the current obs
-python capture_observation.py
-
-# Segment the image
-python segment_image.py
-
-# Project to object pcd
-python segment_to_pcd.py
-
-# Project full scene to world coordinate and visualize with Open3D
-python scene_to_world.py
-'''
-
-## Replay saved best action on xArm7
-'''
-python replay_best_action.py \
-	--action-file outputs/plan/best_action_sequence.npy \
-	--xarm-ip 192.168.1.196 \
-	--base2world base2world.pkl
-'''
+This codebase is provided mainly for reference. It may need to be modified depending on the specific camera setup, robot configuration, and use case.
