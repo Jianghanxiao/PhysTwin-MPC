@@ -1593,11 +1593,14 @@ class InvPhyTrainerWarp:
             action_num, batch_size * num_ctrl, 3
         ).contiguous()
 
-        # Get initial controller rest location (same for all instances)
-        # This is stored in the simulator as wp_original_control_point initially
-        prev_target = wp.to_torch(
-            simulator.wp_original_control_point, requires_grad=False
-        ).clone()
+        # Reset interpolation from the controller rest pose for every batch.
+        # wp_original_control_point is mutated by set_controller_interactive and
+        # can otherwise carry the previous rollout endpoint into this rollout.
+        prev_target = self._single_transfer["morton_vertices"][n_obj:].repeat(batch_size, 1)
+        prev_target = prev_target.to(
+            device=controller_points_array.device,
+            dtype=torch.float32,
+        ).contiguous()
 
         trajectory = None
         if return_trajectory:

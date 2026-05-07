@@ -16,6 +16,7 @@ class PlanResult:
     best_action_seq: np.ndarray
     best_reward: float
     final_chamfer: float
+    best_final_points: np.ndarray
 
 
 class OpenLoopQQTTPlanner:
@@ -170,6 +171,7 @@ class OpenLoopQQTTPlanner:
         action_seq = self._init_action_seq(current_pose)
 
         best_seq = action_seq.clone()
+        best_final_points = current_pts_t.clone()
         best_reward = -float("inf")
         best_chamfer = float("inf")
 
@@ -185,6 +187,7 @@ class OpenLoopQQTTPlanner:
                 if float(rewards[idx].item()) > best_reward:
                     best_reward = float(rewards[idx].item())
                     best_seq = sampled[idx].clone()
+                    best_final_points = final_states[idx].clone()
                     best_chamfer = float(chamfers[idx].item())
 
                 print(
@@ -192,7 +195,12 @@ class OpenLoopQQTTPlanner:
                     f"best_iter_reward={rewards[idx].item():.6f} best_iter_chamfer={chamfers[idx].item():.6f}"
                 )
 
-        return PlanResult(best_action_seq=best_seq.detach().cpu().numpy(), best_reward=best_reward, final_chamfer=best_chamfer)
+        return PlanResult(
+            best_action_seq=best_seq.detach().cpu().numpy(),
+            best_reward=best_reward,
+            final_chamfer=best_chamfer,
+            best_final_points=best_final_points.detach().cpu().numpy(),
+        )
 
     def rollout_trajectory(self, current_pts: np.ndarray, action_seq: np.ndarray) -> np.ndarray:
         pts_t = torch.as_tensor(current_pts, dtype=torch.float32, device=self.device)
